@@ -90,6 +90,12 @@ int main(){
       }
 
       //TODO: create a child process to execute the command
+      int p = fork();
+      if(p == 0){
+        execvp(args[0],args); 
+      }else{
+        waitpid(p, NULL, 0);
+      } 
       
     }
 
