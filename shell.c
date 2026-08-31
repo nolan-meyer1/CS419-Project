@@ -93,6 +93,8 @@ int main(){
       int p = fork();
       if(p == 0){
         execvp(args[0],args); 
+        perror("execvp");
+        _exit(1);
       }else{
         waitpid(p, NULL, 0);
       } 
@@ -141,4 +143,5 @@ int main(){
   }//while
   return 0;
 }//main
-    
+
+
