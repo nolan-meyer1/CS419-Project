@@ -139,9 +139,21 @@ int main(){
      //(4) child process #1  will redefine standard output and write to write to end of the pipe
      //(5) child processs #2 will redefine standard input and read from the read end of the pipe
      //system calls you will need: pipe(), fork(), dup2(), execvp(), wait()/waitpid()
+    int fd[2];
+    pipe(fd);
 
+    int p1 = fork();
+    if(p1 == 0){
+      printf("Child 1: %s\n", args_1[0]);
+    }
 
-      
+    int p2 = fork();
+    if(p2 == 0){
+      printf("Child 2: %s\n", args_2[0]);
+    }
+
+    waitpid(p1, NULL, 0);
+    waitpid(p2, NULL, 0);
     }//if 
   }//while
   return 0;
