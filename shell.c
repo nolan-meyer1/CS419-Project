@@ -90,6 +90,14 @@ int main(){
       }
 
       //TODO: create a child process to execute the command
+      int p = fork();
+      if(p == 0){
+        execvp(args[0],args); 
+        perror("execvp");
+        _exit(1);
+      }else{
+        waitpid(p, NULL, 0);
+      } 
       
     }
 
@@ -125,14 +133,18 @@ int main(){
       }
 
      //TODO: 
-     //(1) create a pipe
+     //(1) create a pipe in the parent process
      //(2) create two child processes to execute the two commands
      //(3) The parent process should close both ends of the pipe and wait for both children
+     //(4) child process #1  will redefine standard output and write to write to end of the pipe
+     //(5) child processs #2 will redefine standard input and read from the read end of the pipe
      //system calls you will need: pipe(), fork(), dup2(), execvp(), wait()/waitpid()
+
 
       
     }//if 
   }//while
   return 0;
 }//main
-    
+
+
