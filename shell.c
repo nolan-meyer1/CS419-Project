@@ -136,8 +136,8 @@ int main(){
      //(1) create a pipe in the parent process
      //(2) create two child processes to execute the two commands
      //(3) The parent process should close both ends of the pipe and wait for both children
-     //(4) child process #1 will write to end of the pipe
-     //(5) child processs #2 will read from the read end of the pipe
+     //(4) child process #1  will redefine standard output and write to write to end of the pipe
+     //(5) child processs #2 will redefine standard input and read from the read end of the pipe
      //system calls you will need: pipe(), fork(), dup2(), execvp(), wait()/waitpid()
 
 
