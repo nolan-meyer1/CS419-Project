@@ -150,26 +150,28 @@ int main(){
       execvp(args_1[0], args_1);
       perror("execvp");
       _exit(1);
-    }
 
-    int p2 = fork();
-    if(p2 == 0){
-      close(fd[1]);
-      dup2(fd[0], STDIN_FILENO); 
+    } else {
+
+      int p2 = fork();
+      if(p2 == 0){
+        close(fd[1]);
+        dup2(fd[0], STDIN_FILENO); 
+        close(fd[0]);
+        execvp(args_2[0], args_2);
+        perror("execvp");
+        _exit(1);
+
+      } else {
+      // Parent process: close both ends of pipe and wait for children
       close(fd[0]);
-      execvp(args_2[0], args_2);
-      perror("execvp");
-      _exit(1);
+      close(fd[1]);
+      waitpid(p1, NULL, 0);
+      waitpid(p2, NULL, 0);
+      }
     }
-
-    // Parent process: close both ends of pipe and wait for children
-    close(fd[0]);
-    close(fd[1]);
-    waitpid(p1, NULL, 0);
-    waitpid(p2, NULL, 0);
-    }//if 
-  }//while
-  return 0;
-}//main
-
+  }
+}
+ return 0;
+}
 
