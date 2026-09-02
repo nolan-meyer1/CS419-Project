@@ -144,7 +144,7 @@ int main(){
 
     int p1 = fork();
     if(p1 == 0){
-      close(fd[0]);  // close read end. Have to close the child processes copy of the pipe that is why we have so many close satements. 
+      close(fd[0]); 
       dup2(fd[1], STDOUT_FILENO); 
       close(fd[1]); 
       execvp(args_1[0], args_1);
