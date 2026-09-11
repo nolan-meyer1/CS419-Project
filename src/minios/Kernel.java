@@ -9,9 +9,19 @@ public class Kernel {
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
     private Process runningProcess = null;
+    private final int timeQuantum; // Time quantum for RR
+    private int quantumRemaining; // Remaining time for the current process
 
     public Kernel(SchedulingAlgo algo) {
         this.algo = algo;
+
+        if(algo instanceof RR){
+            this.timeQuantum = 2;
+            this.quantumRemaining = timeQuantum;
+        }else{
+            this.timeQuantum = Integer.MAX_VALUE; // Effectively no quantum for non-RR algorithms
+            this.quantumRemaining = timeQuantum;
+        }
     }
 
     public void admitProcess(Process p) {
@@ -64,11 +74,21 @@ public class Kernel {
             // Utilize one CPU cycle
             else if(inst.remainingTicks > 0){
                 inst.remainingTicks--;
+
+                if(algo instanceof RR) {
+                    quantumRemaining--;
+                }
+
                 cpuCycleUsed = true;
                 if (inst.remainingTicks == 0) {
                     // The instruction now finishes; load the next
                     // instruction.
                     runningProcess.programCounter++;
+                }
+
+                if(algo instanceof RR && quantumRemaining == 0){
+                    //Process has used up its time quantum; preempt it
+                    preemptProcess(runningProcess);
                 }
             }
 
@@ -112,6 +132,11 @@ public class Kernel {
 
     private Process dispatchNextProcess(int currentTime) {
         runningProcess = algo.selectNextProcess(readyQueue);
+
+        if(algo instanceof RR){
+            quantumRemaining = timeQuantum;
+        }
+
         if (runningProcess != null) {
             System.out.println("[Tick " + currentTime + "] Process " + runningProcess.pid + " executes.");
             runningProcess.state = Process.State.RUNNING;
@@ -126,5 +151,15 @@ public class Kernel {
         return runningProcess == null &&
                 readyQueue.isEmpty() &&
                 waitQueue.isEmpty();
+    }
+
+    private void preemptProcess(Process p){
+
+        if(runningProcess != null){
+            p.state = Process.State.READY;
+            algo.addProcess(readyQueue,p);
+            runningProcess = null;
+            quantumRemaining = timeQuantum;
+        }
     }
 }

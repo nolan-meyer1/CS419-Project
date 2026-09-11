@@ -5,11 +5,15 @@ import java.util.List;
 public class RR implements SchedulingAlgo{
     @Override
     public void addProcess(List<Process> readyQueue, Process p) {
-
+        readyQueue.add(p);
     }
 
     @Override
     public Process selectNextProcess(List<Process> readyQueue) {
-        return null;
+        if (readyQueue.isEmpty()) {
+            return null;
+        } else {
+            return readyQueue.removeFirst();
+        }
     }
 }
