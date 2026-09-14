@@ -21,7 +21,11 @@ public class SJF implements SchedulingAlgo{
             }
         }
 
-        return minProcess;
+        if(minProcess == null){
+            return null;
+        }else {
+            return readyQueue.remove(readyQueue.indexOf(minProcess));
+        }
     }
 
     private int calculateBurstLength(Process p){
