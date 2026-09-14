@@ -13,6 +13,8 @@ public class Process {
     public final List<Instruction> code;
     public int programCounter = 0;
 
+    public int waitTime = 0;
+
     public Process(int pid, int arrivalTime, List<Instruction> code) {
         this.pid = pid;
         this.arrivalTime = arrivalTime;

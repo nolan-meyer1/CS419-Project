@@ -8,6 +8,7 @@ public class Kernel {
     private final SchedulingAlgo algo;
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
+    private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
     private final int timeQuantum; // Time quantum for RR
     private int quantumRemaining; // Remaining time for the current process
@@ -27,12 +28,22 @@ public class Kernel {
     public void admitProcess(Process p) {
         p.state = Process.State.READY;
         algo.addProcess(readyQueue, p);
+        allProcesses.add(p);
     }
 
     // Called on every clock tick
     public void onClockTick(int currentTime) {
         // check all processes currently waiting in I/O wait queue
         serviceWaitQueue(currentTime);
+
+        //Updates wait time for processes in queue
+        for (Process p : readyQueue) {
+            p.waitTime++;
+        }
+
+        for (Process p : waitQueue) {
+            p.waitTime++;
+        }
 
         boolean cpuCycleUsed = false;
         // Execute one CPU cycle
@@ -161,5 +172,16 @@ public class Kernel {
             runningProcess = null;
             quantumRemaining = timeQuantum;
         }
+    }
+
+    public double calculateAverageWaitTime() {
+        int totalWaitTime = 0;
+        int processCount = allProcesses.size();
+
+        for (Process p: allProcesses) {
+            totalWaitTime += p.waitTime;
+        }
+
+        return processCount > 0 ? (double) totalWaitTime / processCount : 0.0;
     }
 }

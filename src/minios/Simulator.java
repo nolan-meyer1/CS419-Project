@@ -47,7 +47,7 @@ public class Simulator {
 
             sim.run();
 
-
+            System.out.printf("Average Wait Time: %.2f",kernel.calculateAverageWaitTime());
     }
 
 }
