@@ -8,15 +8,27 @@ public class Kernel {
     private final SchedulingAlgo algo;
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
+    private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
+    protected int timeQuantum; // Time quantum for RR
+    private int quantumRemaining; // Remaining time for the current process
 
     public Kernel(SchedulingAlgo algo) {
         this.algo = algo;
+
+        if(algo instanceof RR){
+            this.timeQuantum = 2;
+            this.quantumRemaining = timeQuantum;
+        }else{
+            this.timeQuantum = Integer.MAX_VALUE; // Effectively no quantum for non-RR algorithms
+            this.quantumRemaining = timeQuantum;
+        }
     }
 
     public void admitProcess(Process p) {
         p.state = Process.State.READY;
         algo.addProcess(readyQueue, p);
+        allProcesses.add(p);
     }
 
     // Called on every clock tick
@@ -63,12 +75,27 @@ public class Kernel {
             // CPU instruction: the instruction has not finished;
             // Utilize one CPU cycle
             else if(inst.remainingTicks > 0){
+
+                for (Process p : readyQueue) {
+                    p.waitTime++;
+                }
+
                 inst.remainingTicks--;
+
+                if(algo instanceof RR) {
+                    quantumRemaining--;
+                }
+
                 cpuCycleUsed = true;
                 if (inst.remainingTicks == 0) {
                     // The instruction now finishes; load the next
                     // instruction.
                     runningProcess.programCounter++;
+                }
+
+                if(algo instanceof RR && quantumRemaining == 0){
+                    //Process has used up its time quantum; preempt it
+                    preemptProcess(runningProcess);
                 }
             }
 
@@ -81,6 +108,11 @@ public class Kernel {
                 // and move to the next instruction.
                 continue;
             }
+        }
+
+        //Updates wait time for processes in queue
+        for (Process p : waitQueue) {
+            p.waitTime++;
         }
     }
 
@@ -112,6 +144,11 @@ public class Kernel {
 
     private Process dispatchNextProcess(int currentTime) {
         runningProcess = algo.selectNextProcess(readyQueue);
+
+        if(algo instanceof RR){
+            quantumRemaining = timeQuantum;
+        }
+
         if (runningProcess != null) {
             System.out.println("[Tick " + currentTime + "] Process " + runningProcess.pid + " executes.");
             runningProcess.state = Process.State.RUNNING;
@@ -126,5 +163,26 @@ public class Kernel {
         return runningProcess == null &&
                 readyQueue.isEmpty() &&
                 waitQueue.isEmpty();
+    }
+
+    private void preemptProcess(Process p){
+
+        if(runningProcess != null){
+            p.state = Process.State.READY;
+            algo.addProcess(readyQueue,p);
+            runningProcess = null;
+            quantumRemaining = timeQuantum;
+        }
+    }
+
+    public double calculateAverageWaitTime() {
+        int totalWaitTime = 0;
+        int processCount = allProcesses.size();
+
+        for (Process p: allProcesses) {
+            totalWaitTime += p.waitTime;
+        }
+
+        return processCount > 0 ? (double) totalWaitTime / processCount : 0.0;
     }
 }
