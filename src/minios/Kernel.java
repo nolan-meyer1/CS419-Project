@@ -10,7 +10,7 @@ public class Kernel {
     private final List<Process> waitQueue = new ArrayList<>();
     private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
-    private final int timeQuantum; // Time quantum for RR
+    protected int timeQuantum; // Time quantum for RR
     private int quantumRemaining; // Remaining time for the current process
 
     public Kernel(SchedulingAlgo algo) {
@@ -35,15 +35,6 @@ public class Kernel {
     public void onClockTick(int currentTime) {
         // check all processes currently waiting in I/O wait queue
         serviceWaitQueue(currentTime);
-
-        //Updates wait time for processes in queue
-        for (Process p : readyQueue) {
-            p.waitTime++;
-        }
-
-        for (Process p : waitQueue) {
-            p.waitTime++;
-        }
 
         boolean cpuCycleUsed = false;
         // Execute one CPU cycle
@@ -84,6 +75,11 @@ public class Kernel {
             // CPU instruction: the instruction has not finished;
             // Utilize one CPU cycle
             else if(inst.remainingTicks > 0){
+
+                for (Process p : readyQueue) {
+                    p.waitTime++;
+                }
+
                 inst.remainingTicks--;
 
                 if(algo instanceof RR) {
@@ -112,6 +108,11 @@ public class Kernel {
                 // and move to the next instruction.
                 continue;
             }
+        }
+
+        //Updates wait time for processes in queue
+        for (Process p : waitQueue) {
+            p.waitTime++;
         }
     }
 
