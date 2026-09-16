@@ -2,7 +2,7 @@ package minios;
 
 import java.util.List;
 
-public class SJF implements SchedulingAlgo{
+public class SJF implements SchedulingAlgo {
     @Override
     public void addProcess(List<Process> readyQueue, Process p) {
         readyQueue.add(p);
@@ -11,27 +11,30 @@ public class SJF implements SchedulingAlgo{
     @Override
     public Process selectNextProcess(List<Process> readyQueue) {
         int minBurstLength = Integer.MAX_VALUE;
-        Process minProcess = null;
+        int minIndex = -1;
 
-        for (Process p : readyQueue){
+        for (int i = 0; i < readyQueue.size();  i++) {
+            Process p = readyQueue.get(i);
             int burstLength = calculateBurstLength(p);
+
             if (burstLength < minBurstLength){
                 minBurstLength = burstLength;
-                minProcess = p;
+                minIndex = i;
             }
         }
 
-        if(minProcess == null){
+        if(minIndex == -1) {
             return null;
-        }else {
-            return readyQueue.remove(readyQueue.indexOf(minProcess));
         }
+
+        return readyQueue.remove(minIndex);
     }
 
-    private int calculateBurstLength(Process p){
+    private int calculateBurstLength(Process p) {
         int burstLength = 0;
+
         for (Instruction inst : p.code){
-            if(inst.type == Instruction.OpType.CPU){
+            if(inst.type == Instruction.OpType.CPU) {
                 burstLength += inst.duration;
             }
         }
