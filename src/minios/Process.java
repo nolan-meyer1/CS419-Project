@@ -8,17 +8,18 @@ public class Process {
 
     public final int pid;
     public final int arrivalTime;
-
     public State state = State.NEW;
     public final List<Instruction> code;
     public int programCounter = 0;
-
     public int waitTime = 0;
+    public int memorySize = 0;
+    public int address = -1;
 
-    public Process(int pid, int arrivalTime, List<Instruction> code) {
+    public Process(int pid, int arrivalTime, List<Instruction> code, int memorySize) {
         this.pid = pid;
         this.arrivalTime = arrivalTime;
         this.code = new ArrayList<>(code);
+        this.memorySize = memorySize;
     }
 
     public Instruction getCurrentInstruction() {
