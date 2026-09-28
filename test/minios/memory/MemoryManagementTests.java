@@ -15,7 +15,7 @@ public class MemoryManagementTests {
     void testMemoryAllocationSingle(){
         Process p = new Process(1, 0, new ArrayList<>(), 50);
         MemoryManagement memoryManagement = new MemoryManagement(100);
-        assertEquals(true, memoryManagement.allocateMemory(p));
+        assertTrue(memoryManagement.allocateMemory(p));
     }
 
     @Test
@@ -23,8 +23,8 @@ public class MemoryManagementTests {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
         MemoryManagement memoryManagement = new MemoryManagement(100);
-        assertEquals(true, memoryManagement.allocateMemory(p1));
-        assertEquals(true, memoryManagement.allocateMemory(p2));
+        assertTrue(memoryManagement.allocateMemory(p1));
+        assertTrue(memoryManagement.allocateMemory(p2));
     }
 
     @Test
