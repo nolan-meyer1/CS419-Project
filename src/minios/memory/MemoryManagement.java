@@ -2,13 +2,17 @@ package minios.memory;
 
 import minios.Process;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class MemoryManagement {
     protected MemoryBlock head;
 
-    //TOOD: Need to implement a wait queue if there is no memory available for a process. The process should wait until memory is available and then be allocated memory.
+    protected Queue<Process> waitingQueue;
 
     public MemoryManagement(int totalMemory) {
         this.head = new MemoryBlock(0, totalMemory, true);
+        waitingQueue = new LinkedList<>();
     }
 
     public boolean allocateMemory(Process process) {
@@ -39,6 +43,10 @@ public class MemoryManagement {
 
             current = current.getNext();
         }
+
+        //Adds to wait queue if not able to allocate
+        waitingQueue.add(process);
+
         return false;
     }
 
@@ -46,14 +54,18 @@ public class MemoryManagement {
         MemoryBlock current = head;
 
         while (current != null) {
-            if (current.getStartAddress() == startAddress
-                    && !current.isFree()) {
+            if (current.getStartAddress() == startAddress && !current.isFree()) {
 
                 // Mark memory as free
                 current.setFree(true);
 
                 // Merge all adjacent free blocks
                 mergeFreeBlocks();
+
+                //Tries to allocate memory for processes in the waiting queue
+                if(!waitingQueue.isEmpty()) {
+                    allocateMemory(waitingQueue.poll());
+                }
 
                 return true;
             }
@@ -81,7 +93,4 @@ public class MemoryManagement {
             }
         }
     }
-
-
-
 }
