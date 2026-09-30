@@ -3,11 +3,13 @@ package minios;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 
 public class Kernel {
     private final SchedulingAlgo algo;
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
+    protected Queue<Process> memoryWaitQueue;
     private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
     protected int timeQuantum; // Time quantum for RR

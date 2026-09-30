@@ -8,11 +8,8 @@ import java.util.Queue;
 public class MemoryManagement {
     protected MemoryBlock head;
 
-    protected Queue<Process> waitingQueue;
-
     public MemoryManagement(int totalMemory) {
         this.head = new MemoryBlock(0, totalMemory, true);
-        waitingQueue = new LinkedList<>();
     }
 
     public boolean allocateMemory(Process process) {
@@ -44,9 +41,6 @@ public class MemoryManagement {
             current = current.getNext();
         }
 
-        //Adds to wait queue if not able to allocate
-        waitingQueue.add(process);
-
         return false;
     }
 
@@ -61,11 +55,6 @@ public class MemoryManagement {
 
                 // Merge all adjacent free blocks
                 mergeFreeBlocks();
-
-                //Tries to allocate memory for processes in the waiting queue
-                if(!waitingQueue.isEmpty()) {
-                    allocateMemory(waitingQueue.poll());
-                }
 
                 return true;
             }

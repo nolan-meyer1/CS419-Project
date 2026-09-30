@@ -66,25 +66,5 @@ public class MemoryManagementTests {
 
     }
 
-    @Test
-    void testWaitQueue() {
-        Process p1 = new Process(1, 0, new ArrayList<>(), 50);
-        Process p2 = new Process(2, 0, new ArrayList<>(), 30);
-        Process p3 = new Process(3, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
-
-        //Allocates first two processes successfully, but third one fails due to lack of memory
-        assertTrue(memoryManagement.allocateMemory(p1));
-        assertTrue(memoryManagement.allocateMemory(p2));
-        assertFalse(memoryManagement.allocateMemory(p3));
-
-        //Tests that the wait queue was added to
-        assertEquals(1,memoryManagement.waitingQueue.size());
-
-        //Tests that the first process was deallocated and the processes from the wait queue was allocated
-        assertTrue(memoryManagement.deallocateMemory(50));
-        assertEquals(0,memoryManagement.waitingQueue.size());
-    }
-
 
 }
