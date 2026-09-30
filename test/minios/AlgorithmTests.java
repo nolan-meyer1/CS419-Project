@@ -31,7 +31,7 @@ public class AlgorithmTests {
     void testRR() throws IOException {
         SchedulingAlgo algo = new RR();
         Kernel kernel = new Kernel(algo);
-        //Changed to five like example on the slides
+        //Changed to four like example on the slides
         kernel.timeQuantum = 4;
         Simulator sim = new Simulator(kernel, TraceParser.parseWorkload("test/minios/rr_test_workload.txt"));
         sim.run();

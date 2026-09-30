@@ -1,9 +1,4 @@
-package minios.memory;
-
-import minios.Process;
-
-import java.util.LinkedList;
-import java.util.Queue;
+package minios;
 
 public class MemoryManagement {
     protected MemoryBlock head;
@@ -25,6 +20,9 @@ public class MemoryManagement {
                 // Allocate requested memory
                 current.setFree(false);
                 current.setSize(process.memorySize);
+
+                //Set the process's start address
+                process.address = current.getStartAddress();
 
                 // Create a new block for remaining free memory
                 if (remainingSize > 0) {

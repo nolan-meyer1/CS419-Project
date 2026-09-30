@@ -1,6 +1,9 @@
-package minios.memory;
+package minios;
 
+import minios.Kernel;
+import minios.MemoryManagement;
 import minios.Process;
+import minios.SJF;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -63,6 +66,25 @@ public class MemoryManagementTests {
         //Tests that the head how has the full 100, and that there is no next block
         assertEquals(100,memoryManagement.head.getSize());
         assertEquals(null,memoryManagement.head.getNext());
+
+    }
+
+    @Test
+    void testMemoryWaitQueue() {
+
+        Process p1 = new Process(1, 0, new ArrayList<>(), 70);
+        Process p2 = new Process(2, 0, new ArrayList<>(), 40);
+        Kernel kernel = new Kernel(new SJF());
+
+        //Second process should be put in the memory wait queue since there is not enough memory for it
+        kernel.admitProcess(p1);
+        kernel.admitProcess(p2);
+
+        assertEquals(1, kernel.memoryWaitQueue.size());
+
+        kernel.onClockTick(1);
+
+        assertEquals(0, kernel.memoryWaitQueue.size());
 
     }
 
