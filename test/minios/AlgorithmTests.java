@@ -12,7 +12,7 @@ public class AlgorithmTests {
     @Test
     void testFCFS() throws IOException {
         SchedulingAlgo algo = new FCFS();
-        Kernel kernel = new Kernel(algo);
+        Kernel kernel = new Kernel(algo,new ContiguousAllocation(100));
         Simulator sim = new Simulator(kernel, TraceParser.parseWorkload("test/minios/fcfs_test_workload.txt"));
         sim.run();
         assertEquals(16, kernel.calculateAverageWaitTime());
@@ -21,7 +21,7 @@ public class AlgorithmTests {
     @Test
     void testSJF() throws IOException {
         SchedulingAlgo algo = new SJF();
-        Kernel kernel = new Kernel(algo);
+        Kernel kernel = new Kernel(algo,new ContiguousAllocation(100));
         Simulator sim = new Simulator(kernel, TraceParser.parseWorkload("test/minios/sjf_test_workload.txt"));
         sim.run();
         assertEquals(7.75, kernel.calculateAverageWaitTime());
@@ -30,8 +30,8 @@ public class AlgorithmTests {
     @Test
     void testRR() throws IOException {
         SchedulingAlgo algo = new RR();
-        Kernel kernel = new Kernel(algo);
-        //Changed to five like example on the slides
+        Kernel kernel = new Kernel(algo,new ContiguousAllocation(100));
+        //Changed to four like example on the slides
         kernel.timeQuantum = 4;
         Simulator sim = new Simulator(kernel, TraceParser.parseWorkload("test/minios/rr_test_workload.txt"));
         sim.run();

@@ -1,20 +1,21 @@
 package minios;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Kernel {
     private final SchedulingAlgo algo;
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
+    private final MemoryManagement memoryManagement;
+    protected final Queue<Process> memoryWaitQueue = new LinkedList<>();
     private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
     protected int timeQuantum; // Time quantum for RR
     private int quantumRemaining; // Remaining time for the current process
 
-    public Kernel(SchedulingAlgo algo) {
+    public Kernel(SchedulingAlgo algo, MemoryManagement memoryManagement) {
         this.algo = algo;
+        this.memoryManagement = memoryManagement;
 
         if(algo instanceof RR){
             this.timeQuantum = 2;
@@ -26,9 +27,15 @@ public class Kernel {
     }
 
     public void admitProcess(Process p) {
-        p.state = Process.State.READY;
-        algo.addProcess(readyQueue, p);
-        allProcesses.add(p);
+
+        if(memoryManagement.allocateMemory(p)) {
+
+            p.state = Process.State.READY;
+            algo.addProcess(readyQueue, p);
+            allProcesses.add(p);
+        }else{
+            memoryWaitQueue.add(p);
+        }
     }
 
     // Called on every clock tick
@@ -140,6 +147,17 @@ public class Kernel {
     private void terminateProcess(Process p) {
         p.state = Process.State.TERMINATED;
         runningProcess = null;
+        memoryManagement.deallocateMemory(p.address);
+
+        if(!memoryWaitQueue.isEmpty()) {
+            Process waitingProcess = memoryWaitQueue.peek();
+            if (memoryManagement.allocateMemory(waitingProcess)) {
+                memoryWaitQueue.poll();
+                waitingProcess.state = Process.State.READY;
+                algo.addProcess(readyQueue, waitingProcess);
+                allProcesses.add(waitingProcess);
+            }
+        }
     }
 
     private Process dispatchNextProcess(int currentTime) {

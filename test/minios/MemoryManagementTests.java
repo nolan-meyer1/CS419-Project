@@ -1,6 +1,9 @@
-package minios.memory;
+package minios;
 
+import minios.Kernel;
+import minios.MemoryManagement;
 import minios.Process;
+import minios.SJF;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -12,27 +15,27 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class MemoryManagementTests {
 
     @Test
-    void testMemoryAllocationSingle(){
+    void testMemoryAllocationSingleContiguous(){
         Process p = new Process(1, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
         assertTrue(memoryManagement.allocateMemory(p));
     }
 
     @Test
-    void testMemoryAllocationDouble() {
+    void testMemoryAllocationDoubleContiguous() {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
     }
 
     @Test
-    void testDeallocation() {
+    void testDeallocatioContiguous() {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 30);
         Process p3 = new Process(3, 0, new ArrayList<>(), 20);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
@@ -48,10 +51,10 @@ public class MemoryManagementTests {
     }
 
     @Test
-    void testFullMerge(){
+    void testFullMergeContiguous(){
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
@@ -67,23 +70,22 @@ public class MemoryManagementTests {
     }
 
     @Test
-    void testWaitQueue() {
-        Process p1 = new Process(1, 0, new ArrayList<>(), 50);
-        Process p2 = new Process(2, 0, new ArrayList<>(), 30);
-        Process p3 = new Process(3, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+    void testMemoryWaitQueue() {
 
-        //Allocates first two processes successfully, but third one fails due to lack of memory
-        assertTrue(memoryManagement.allocateMemory(p1));
-        assertTrue(memoryManagement.allocateMemory(p2));
-        assertFalse(memoryManagement.allocateMemory(p3));
+        Process p1 = new Process(1, 0, new ArrayList<>(), 70);
+        Process p2 = new Process(2, 0, new ArrayList<>(), 40);
+        Kernel kernel = new Kernel(new SJF(),new ContiguousAllocation(100));
 
-        //Tests that the wait queue was added to
-        assertEquals(1,memoryManagement.waitingQueue.size());
+        //Second process should be put in the memory wait queue since there is not enough memory for it
+        kernel.admitProcess(p1);
+        kernel.admitProcess(p2);
 
-        //Tests that the first process was deallocated and the processes from the wait queue was allocated
-        assertTrue(memoryManagement.deallocateMemory(50));
-        assertEquals(0,memoryManagement.waitingQueue.size());
+        assertEquals(1, kernel.memoryWaitQueue.size());
+
+        kernel.onClockTick(1);
+
+        assertEquals(0, kernel.memoryWaitQueue.size());
+
     }
 
 

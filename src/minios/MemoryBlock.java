@@ -1,4 +1,4 @@
-package minios.memory;
+package minios;
 
 public class MemoryBlock {
     private int startAddress;

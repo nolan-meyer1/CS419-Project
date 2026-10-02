@@ -1,18 +1,10 @@
-package minios.memory;
+package minios;
 
-import minios.Process;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-public class MemoryManagement {
+public class ContiguousAllocation implements MemoryManagement {
     protected MemoryBlock head;
 
-    protected Queue<Process> waitingQueue;
-
-    public MemoryManagement(int totalMemory) {
+    public ContiguousAllocation(int totalMemory) {
         this.head = new MemoryBlock(0, totalMemory, true);
-        waitingQueue = new LinkedList<>();
     }
 
     public boolean allocateMemory(Process process) {
@@ -29,6 +21,9 @@ public class MemoryManagement {
                 current.setFree(false);
                 current.setSize(process.memorySize);
 
+                //Set the process's start address
+                process.address = current.getStartAddress();
+
                 // Create a new block for remaining free memory
                 if (remainingSize > 0) {
                     MemoryBlock newBlock = new MemoryBlock(current.getStartAddress() + process.memorySize, remainingSize, true);
@@ -44,9 +39,6 @@ public class MemoryManagement {
             current = current.getNext();
         }
 
-        //Adds to wait queue if not able to allocate
-        waitingQueue.add(process);
-
         return false;
     }
 
@@ -61,11 +53,6 @@ public class MemoryManagement {
 
                 // Merge all adjacent free blocks
                 mergeFreeBlocks();
-
-                //Tries to allocate memory for processes in the waiting queue
-                if(!waitingQueue.isEmpty()) {
-                    allocateMemory(waitingQueue.poll());
-                }
 
                 return true;
             }
