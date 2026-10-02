@@ -6,15 +6,16 @@ public class Kernel {
     private final SchedulingAlgo algo;
     private final List<Process> readyQueue = new ArrayList<>();
     private final List<Process> waitQueue = new ArrayList<>();
-    private final MemoryManagement memoryManagement = new MemoryManagement(100);
+    private final MemoryManagement memoryManagement;
     protected final Queue<Process> memoryWaitQueue = new LinkedList<>();
     private final List<Process> allProcesses = new ArrayList<>();
     private Process runningProcess = null;
     protected int timeQuantum; // Time quantum for RR
     private int quantumRemaining; // Remaining time for the current process
 
-    public Kernel(SchedulingAlgo algo) {
+    public Kernel(SchedulingAlgo algo, MemoryManagement memoryManagement) {
         this.algo = algo;
+        this.memoryManagement = memoryManagement;
 
         if(algo instanceof RR){
             this.timeQuantum = 2;

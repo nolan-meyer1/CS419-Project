@@ -15,27 +15,27 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class MemoryManagementTests {
 
     @Test
-    void testMemoryAllocationSingle(){
+    void testMemoryAllocationSingleContiguous(){
         Process p = new Process(1, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
         assertTrue(memoryManagement.allocateMemory(p));
     }
 
     @Test
-    void testMemoryAllocationDouble() {
+    void testMemoryAllocationDoubleContiguous() {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
     }
 
     @Test
-    void testDeallocation() {
+    void testDeallocatioContiguous() {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 30);
         Process p3 = new Process(3, 0, new ArrayList<>(), 20);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
@@ -51,10 +51,10 @@ public class MemoryManagementTests {
     }
 
     @Test
-    void testFullMerge(){
+    void testFullMergeContiguous(){
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
-        MemoryManagement memoryManagement = new MemoryManagement(100);
+        ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
         assertTrue(memoryManagement.allocateMemory(p1));
         assertTrue(memoryManagement.allocateMemory(p2));
@@ -74,7 +74,7 @@ public class MemoryManagementTests {
 
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
-        Kernel kernel = new Kernel(new SJF());
+        Kernel kernel = new Kernel(new SJF(),new ContiguousAllocation(100));
 
         //Second process should be put in the memory wait queue since there is not enough memory for it
         kernel.admitProcess(p1);
