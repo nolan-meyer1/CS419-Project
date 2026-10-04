@@ -88,5 +88,11 @@ public class MemoryManagementTests {
 
     }
 
+    @Test
+    void testFrameCalculation(){
+        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+        assertEquals(10, pagingAllocation.getTotalFrames());
+    }
+
 
 }
