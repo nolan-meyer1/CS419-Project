@@ -1,3 +1,5 @@
+package minios;
+
 import minios.MemoryManagement;
 import minios.Process;
 
