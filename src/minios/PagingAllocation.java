@@ -31,15 +31,8 @@ public class PagingAllocation implements MemoryManagement {
         int requiredPages = (int) Math.ceil((double) process.memorySize / pageSize);
 
         //Checks if there is enough free frames
-        int freeFrames = 0;
-        for(boolean frame : frameTable){
-            if(frame){
-                freeFrames++;
-            }
-        }
-
-        if(freeFrames < requiredPages){
-            return false; // Not enough free frames
+        if(freeFrames() < requiredPages){
+            return false;
         }
 
         //TODO: Implement the actual allocation logic here, updating the frameTable and processPageTables accordingly.
@@ -49,6 +42,17 @@ public class PagingAllocation implements MemoryManagement {
     @Override
     public boolean deallocateMemory(int startAddress) {
         return false;
+    }
+
+    //Calculate free frames
+    private int freeFrames(){
+        int freeFrames = 0;
+        for(boolean frame : frameTable){
+            if(frame){
+                freeFrames++;
+            }
+        }
+        return freeFrames;
     }
 
     public int getPageSize() {
