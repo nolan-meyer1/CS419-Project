@@ -97,13 +97,20 @@ public class MemoryManagementTests {
     }
 
     @Test
-    void testPagingAllocationSimple(){
+    void testPagingAllocation(){
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
-        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+        Kernel kernel = new Kernel(new SJF(),new PagingAllocation(10,100));
 
-        assertTrue(pagingAllocation.allocateMemory(p1));
-        assertFalse(pagingAllocation.allocateMemory(p2));
+        //Second process should be put in the memory wait queue since there is not enough memory for it
+        kernel.admitProcess(p1);
+        kernel.admitProcess(p2);
+
+        assertEquals(1, kernel.memoryWaitQueue.size());
+
+        kernel.onClockTick(1);
+
+        assertEquals(0, kernel.memoryWaitQueue.size());
     }
 
 
