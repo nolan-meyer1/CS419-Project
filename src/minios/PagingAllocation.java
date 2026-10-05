@@ -2,8 +2,6 @@ package minios;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class PagingAllocation implements MemoryManagement {
 
@@ -60,7 +58,7 @@ public class PagingAllocation implements MemoryManagement {
     }
 
     //Calculate free frames
-    private int freeFrames(){
+    protected int freeFrames(){
         int freeFrames = 0;
         for(boolean frame : frameTable){
             if(frame){
@@ -81,4 +79,9 @@ public class PagingAllocation implements MemoryManagement {
     public int getTotalFrames() {
         return totalFrames;
     }
+
+    public ArrayList getProcessPageTable(Process process) {
+        return pageTable.get(process);
+    }
+
 }

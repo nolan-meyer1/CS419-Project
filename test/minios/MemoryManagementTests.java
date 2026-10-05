@@ -100,17 +100,34 @@ public class MemoryManagementTests {
     void testPagingAllocation(){
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
-        Kernel kernel = new Kernel(new SJF(),new PagingAllocation(10,100));
+        PagingAllocation pagingAllocation = new PagingAllocation(10,100);
+        Kernel kernel = new Kernel(new SJF(),pagingAllocation);
 
         //Second process should be put in the memory wait queue since there is not enough memory for it
         kernel.admitProcess(p1);
         kernel.admitProcess(p2);
 
+        //Tests that the page table for p1 has the correct number of pages (7 pages for 70 memory size with page size of 10)
+        assertEquals(7, p1.pageTable.size());
+
+        //Tests that the frames allocated to p1 are marked as used in the frame table
+        ArrayList<Integer> pageTableP1 = pagingAllocation.getProcessPageTable(p1);
+        assertEquals(7,pageTableP1.size());
+        assertEquals(3, pagingAllocation.freeFrames());
+
+        //Process 2 is added to wait queue since there are not enough free frames for it
         assertEquals(1, kernel.memoryWaitQueue.size());
 
+        //Advances clock
         kernel.onClockTick(1);
 
+        //Tests that process 2 is allocated memory and removed from the wait queue
         assertEquals(0, kernel.memoryWaitQueue.size());
+
+        //tests that the frames allocated to p2 are marked as used in the frame table
+        ArrayList<Integer> pageTableP2 = pagingAllocation.getProcessPageTable(p2);
+        assertEquals(4,pageTableP2.size());
+        assertEquals(6, pagingAllocation.freeFrames());
     }
 
 
