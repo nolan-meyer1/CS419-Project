@@ -97,7 +97,7 @@ public class MemoryManagementTests {
     }
 
     @Test
-    void testPagingAllocationFalse(){
+    void testPagingAllocationSimple(){
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
         PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
