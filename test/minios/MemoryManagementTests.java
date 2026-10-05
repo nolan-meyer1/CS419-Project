@@ -1,9 +1,5 @@
 package minios;
 
-import minios.Kernel;
-import minios.MemoryManagement;
-import minios.Process;
-import minios.SJF;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -92,6 +88,22 @@ public class MemoryManagementTests {
     void testFrameCalculation(){
         PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
         assertEquals(10, pagingAllocation.getTotalFrames());
+    }
+
+    @Test
+    void testPageSize(){
+        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+        assertEquals(10, pagingAllocation.getPageSize());
+    }
+
+    @Test
+    void testPagingAllocationFalse(){
+        Process p1 = new Process(1, 0, new ArrayList<>(), 70);
+        Process p2 = new Process(2, 0, new ArrayList<>(), 40);
+        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+
+        assertTrue(pagingAllocation.allocateMemory(p1));
+        assertFalse(pagingAllocation.allocateMemory(p2));
     }
 
 
