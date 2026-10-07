@@ -38,8 +38,8 @@ public class MemoryManagementTests {
         assertTrue(memoryManagement.allocateMemory(p3));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(50));
-        assertTrue(memoryManagement.deallocateMemory(80));
+        assertTrue(memoryManagement.deallocateMemory(p2));
+        assertTrue(memoryManagement.deallocateMemory(p3));
 
         //Checks that free memory is merged back together
         assertEquals(50,memoryManagement.head.getSize());
@@ -56,8 +56,8 @@ public class MemoryManagementTests {
         assertTrue(memoryManagement.allocateMemory(p2));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(0));
-        assertTrue(memoryManagement.deallocateMemory(50));
+        assertTrue(memoryManagement.deallocateMemory(p1));
+        assertTrue(memoryManagement.deallocateMemory(p2));
 
         //Tests that the head how has the full 100, and that there is no next block
         assertEquals(100,memoryManagement.head.getSize());
@@ -104,6 +104,26 @@ public class MemoryManagementTests {
 
         assertTrue(pagingAllocation.allocateMemory(p1));
         assertFalse(pagingAllocation.allocateMemory(p2));
+    }
+
+    @Test
+    void testPagingDeallocation(){
+        PagingAllocation memoryManagment = new PagingAllocation(10, 40);
+
+        Process p1 = new Process(1, 0 , new ArrayList<>(), 20);
+        Process p2 = new Process(2, 0 , new ArrayList<>(), 30);
+
+        // p1 needs 2 pages, so it should allocate successfully
+        assertTrue(memoryManagment.allocateMemory(p1));
+
+        // p2 needs 3 pages, but only 2 frames are left
+        assertFalse(memoryManagment.allocateMemory(p2));
+
+        // Free p1's 2 frames
+        assertTrue(memoryManagment.deallocateMemory(p1));
+
+        // Now all 4 frames are free again, so p2 should fit
+        assertTrue(memoryManagment.allocateMemory(p2));
     }
 
 

@@ -7,6 +7,7 @@ public class ContiguousAllocation implements MemoryManagement {
         this.head = new MemoryBlock(0, totalMemory, true);
     }
 
+    @Override
     public boolean allocateMemory(Process process) {
 
         MemoryBlock current = head;
@@ -42,7 +43,9 @@ public class ContiguousAllocation implements MemoryManagement {
         return false;
     }
 
-    public boolean deallocateMemory(int startAddress) {
+    @Override
+    public boolean deallocateMemory(Process process) {
+        int startAddress = process.address;
         MemoryBlock current = head;
 
         while (current != null) {
@@ -53,6 +56,8 @@ public class ContiguousAllocation implements MemoryManagement {
 
                 // Merge all adjacent free blocks
                 mergeFreeBlocks();
+
+                process.address = -1;
 
                 return true;
             }

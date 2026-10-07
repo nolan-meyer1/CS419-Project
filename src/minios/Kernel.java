@@ -147,13 +147,19 @@ public class Kernel {
     private void terminateProcess(Process p) {
         p.state = Process.State.TERMINATED;
         runningProcess = null;
-        memoryManagement.deallocateMemory(p.address);
+        memoryManagement.deallocateMemory(p);
+        scanMemoryWaitQueue();
 
-        if(!memoryWaitQueue.isEmpty()) {
-            Process waitingProcess = memoryWaitQueue.peek();
-            if (memoryManagement.allocateMemory(waitingProcess)) {
-                memoryWaitQueue.poll();
-                waitingProcess.state = Process.State.READY;
+    }
+    private void scanMemoryWaitQueue(){
+        Iterator<Process> iterator = memoryWaitQueue.iterator();
+
+        while (iterator.hasNext()) {
+            Process waitingProcess = iterator.next();
+
+            if (memoryManagement.allocateMemory(waitingProcess)){
+                iterator.remove();
+                waitingProcess.state= Process.State.READY;
                 algo.addProcess(readyQueue, waitingProcess);
                 allProcesses.add(waitingProcess);
             }
@@ -180,7 +186,8 @@ public class Kernel {
     public boolean isIdle() {
         return runningProcess == null &&
                 readyQueue.isEmpty() &&
-                waitQueue.isEmpty();
+                waitQueue.isEmpty() &&
+                memoryWaitQueue.isEmpty();
     }
 
     private void preemptProcess(Process p){

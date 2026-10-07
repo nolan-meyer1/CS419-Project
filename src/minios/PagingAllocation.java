@@ -35,12 +35,29 @@ public class PagingAllocation implements MemoryManagement {
             return false;
         }
 
-        //TODO: Implement the actual allocation logic here, updating the frameTable and processPageTables accordingly.
+        //Creates new page table for process
+        process.pageTable = new int[requiredPages];
+
+        int pageIndex = 0;
+
+        //Finds free frames and assigns them to the process
+        for (int i = 0; i < totalFrames && pageIndex < requiredPages; i++){
+
+            if (frameTable[i]){
+                frameTable[i] = false;
+
+                //Stores which frame this page was assigned to
+                process.pageTable[pageIndex] = i;
+
+                pageIndex++;
+            }
+        }
         return true;
     }
 
     @Override
-    public boolean deallocateMemory(int startAddress) {
+    public boolean deallocateMemory(Process process) {
+        //TODO: Implement deallocation
         return false;
     }
 
