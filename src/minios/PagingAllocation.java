@@ -27,7 +27,7 @@ public class PagingAllocation implements MemoryManagement {
 
 
     @Override
-    public boolean allocateMemory(Process process) {
+    public boolean allocate(Process process) {
         int requiredPages = (int) Math.ceil((double) process.memorySize / pageSize);
 
         //Checks if there is enough free frames
@@ -56,8 +56,11 @@ public class PagingAllocation implements MemoryManagement {
     }
 
     @Override
-    public boolean deallocateMemory(Process process) {
+    public boolean release(Process process) {
         //TODO: Implement deallocation
+
+
+
         return false;
     }
 

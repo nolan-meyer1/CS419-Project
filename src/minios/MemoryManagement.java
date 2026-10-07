@@ -2,7 +2,7 @@ package minios;
 
 public interface MemoryManagement {
 
-    boolean allocateMemory(Process process);
+    boolean allocate(Process process);
 
-    boolean deallocateMemory(Process process);
+    boolean release(Process process);
 }

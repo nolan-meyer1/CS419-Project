@@ -8,7 +8,7 @@ public class ContiguousAllocation implements MemoryManagement {
     }
 
     @Override
-    public boolean allocateMemory(Process process) {
+    public boolean allocate(Process process) {
 
         MemoryBlock current = head;
 
@@ -44,7 +44,7 @@ public class ContiguousAllocation implements MemoryManagement {
     }
 
     @Override
-    public boolean deallocateMemory(Process process) {
+    public boolean release(Process process) {
         int startAddress = process.address;
         MemoryBlock current = head;
 

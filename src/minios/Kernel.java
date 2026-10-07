@@ -28,7 +28,7 @@ public class Kernel {
 
     public void admitProcess(Process p) {
 
-        if(memoryManagement.allocateMemory(p)) {
+        if(memoryManagement.allocate(p)) {
 
             p.state = Process.State.READY;
             algo.addProcess(readyQueue, p);
@@ -147,7 +147,7 @@ public class Kernel {
     private void terminateProcess(Process p) {
         p.state = Process.State.TERMINATED;
         runningProcess = null;
-        memoryManagement.deallocateMemory(p);
+        memoryManagement.release(p);
         scanMemoryWaitQueue();
 
     }
@@ -157,7 +157,7 @@ public class Kernel {
         while (iterator.hasNext()) {
             Process waitingProcess = iterator.next();
 
-            if (memoryManagement.allocateMemory(waitingProcess)){
+            if (memoryManagement.allocate(waitingProcess)){
                 iterator.remove();
                 waitingProcess.state= Process.State.READY;
                 algo.addProcess(readyQueue, waitingProcess);

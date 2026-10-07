@@ -1,6 +1,5 @@
 package minios;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ public class MemoryManagementTests {
     void testMemoryAllocationSingleContiguous(){
         Process p = new Process(1, 0, new ArrayList<>(), 50);
         ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
-        assertTrue(memoryManagement.allocateMemory(p));
+        assertTrue(memoryManagement.allocate(p));
     }
 
     @Test
@@ -23,8 +22,8 @@ public class MemoryManagementTests {
         Process p1 = new Process(1, 0, new ArrayList<>(), 50);
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
         ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
-        assertTrue(memoryManagement.allocateMemory(p1));
-        assertTrue(memoryManagement.allocateMemory(p2));
+        assertTrue(memoryManagement.allocate(p1));
+        assertTrue(memoryManagement.allocate(p2));
     }
 
     @Test
@@ -34,13 +33,13 @@ public class MemoryManagementTests {
         Process p3 = new Process(3, 0, new ArrayList<>(), 20);
         ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
-        assertTrue(memoryManagement.allocateMemory(p1));
-        assertTrue(memoryManagement.allocateMemory(p2));
-        assertTrue(memoryManagement.allocateMemory(p3));
+        assertTrue(memoryManagement.allocate(p1));
+        assertTrue(memoryManagement.allocate(p2));
+        assertTrue(memoryManagement.allocate(p3));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(p2));
-        assertTrue(memoryManagement.deallocateMemory(p3));
+        assertTrue(memoryManagement.release(p2));
+        assertTrue(memoryManagement.release(p3));
 
         //Checks that free memory is merged back together
         assertEquals(50,memoryManagement.head.getSize());
@@ -53,12 +52,12 @@ public class MemoryManagementTests {
         Process p2 = new Process(2, 0, new ArrayList<>(), 50);
         ContiguousAllocation memoryManagement = new ContiguousAllocation(100);
 
-        assertTrue(memoryManagement.allocateMemory(p1));
-        assertTrue(memoryManagement.allocateMemory(p2));
+        assertTrue(memoryManagement.allocate(p1));
+        assertTrue(memoryManagement.allocate(p2));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(p1));
-        assertTrue(memoryManagement.deallocateMemory(p2));
+        assertTrue(memoryManagement.release(p1));
+        assertTrue(memoryManagement.release(p2));
 
         //Tests that the head how has the full 100, and that there is no next block
         assertEquals(100,memoryManagement.head.getSize());
@@ -105,16 +104,16 @@ public class MemoryManagementTests {
         Process p2 = new Process(2, 0 , new ArrayList<>(), 30);
 
         // p1 needs 2 pages, so it should allocate successfully
-        assertTrue(memoryManagment.allocateMemory(p1));
+        assertTrue(memoryManagment.allocate(p1));
 
         // p2 needs 3 pages, but only 2 frames are left
-        assertFalse(memoryManagment.allocateMemory(p2));
+        assertFalse(memoryManagment.allocate(p2));
 
         // Free p1's 2 frames
-        assertTrue(memoryManagment.deallocateMemory(p1));
+        assertTrue(memoryManagment.release(p1));
 
         // Now all 4 frames are free again, so p2 should fit
-        assertTrue(memoryManagment.allocateMemory(p2));
+        assertTrue(memoryManagment.allocate(p2));
     }
 
     @Test
