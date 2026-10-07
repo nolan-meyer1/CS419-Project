@@ -57,11 +57,17 @@ public class PagingAllocation implements MemoryManagement {
 
     @Override
     public boolean release(Process process) {
-        //TODO: Implement deallocation
 
+        if (process.pageTable == null) {
+            return false;
+        }else{
 
+            for(int frameIndex : process.pageTable){
+                frameTable[frameIndex] = true;
+            }
 
-        return false;
+            return true;
+        }
     }
 
     //Calculate free frames

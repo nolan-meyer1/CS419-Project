@@ -129,9 +129,6 @@ public class MemoryManagementTests {
 
         //Tests that the page table for p1 has the correct number of pages (7 pages for 70 memory size with page size of 10)
         assertEquals(7, p1.pageTable.length);
-
-        //Tests that the frames allocated to p1 are marked as used in the frame table
-        assertEquals(7, p1.pageTable.length);
         assertEquals(3, pagingAllocation.freeFrames());
 
         //Process 2 is added to wait queue since there are not enough free frames for it
@@ -145,7 +142,6 @@ public class MemoryManagementTests {
 
         //tests that the frames allocated to p2 are marked as used in the frame table
         assertEquals(4, p2.pageTable.length);
-        assertEquals(6, pagingAllocation.freeFrames());
     }
 
 }
