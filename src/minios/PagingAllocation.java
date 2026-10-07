@@ -2,6 +2,8 @@ package minios;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PagingAllocation implements MemoryManagement {
 
@@ -9,7 +11,6 @@ public class PagingAllocation implements MemoryManagement {
     private final int totalMemory;
     private final int totalFrames;
     private boolean[] frameTable; //false means that is is allocated true means that is free
-    private HashMap<Process,ArrayList> pageTable;
 
 
 
@@ -18,7 +19,6 @@ public class PagingAllocation implements MemoryManagement {
         this.totalMemory = totalMemory;
         this.totalFrames = totalMemory / pageSize;
         this.frameTable = new boolean[totalFrames];
-        pageTable = new HashMap<>();
 
         for(int i = 0; i < totalFrames; i++){
             frameTable[i] = true; // Initialize all frames as free
@@ -33,27 +33,31 @@ public class PagingAllocation implements MemoryManagement {
         //Checks if there is enough free frames
         if(freeFrames() < requiredPages){
             return false;
-        }else {
-
-            //TODO: Verify that this is correct
-            ArrayList<Integer> processPageTable = new ArrayList<>();
-            for (int i = 0; i < totalFrames && processPageTable.size() < requiredPages; i++) {
-                if (frameTable[i]) { // If the frame is free
-                    frameTable[i] = false; // Mark it as allocated
-                    processPageTable.add(i); // Add to the process's page table
-                }
-            }
-
-            //Adds the page table to the process
-            process.pageTable = processPageTable;
-            pageTable.put(process, processPageTable);
-            return true;
         }
+
+        //Creates new page table for process
+        process.pageTable = new int[requiredPages];
+
+        int pageIndex = 0;
+
+        //Finds free frames and assigns them to the process
+        for (int i = 0; i < totalFrames && pageIndex < requiredPages; i++){
+
+            if (frameTable[i]){
+                frameTable[i] = false;
+
+                //Stores which frame this page was assigned to
+                process.pageTable[pageIndex] = i;
+
+                pageIndex++;
+            }
+        }
+        return true;
     }
 
     @Override
-    public boolean deallocateMemory(int processId) {
-        //TODO: Loop through the hashmap and find the process with the given start address, then free its frames and remove it from hashmap. Make test case pass
+    public boolean deallocateMemory(Process process) {
+        //TODO: Implement deallocation
         return false;
     }
 
@@ -79,9 +83,4 @@ public class PagingAllocation implements MemoryManagement {
     public int getTotalFrames() {
         return totalFrames;
     }
-
-    public ArrayList getProcessPageTable(Process process) {
-        return pageTable.get(process);
-    }
-
 }

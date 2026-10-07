@@ -1,5 +1,6 @@
 package minios;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ public class MemoryManagementTests {
         assertTrue(memoryManagement.allocateMemory(p3));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(50));
-        assertTrue(memoryManagement.deallocateMemory(80));
+        assertTrue(memoryManagement.deallocateMemory(p2));
+        assertTrue(memoryManagement.deallocateMemory(p3));
 
         //Checks that free memory is merged back together
         assertEquals(50,memoryManagement.head.getSize());
@@ -56,8 +57,8 @@ public class MemoryManagementTests {
         assertTrue(memoryManagement.allocateMemory(p2));
 
         //Tests that both are deallocated successfully
-        assertTrue(memoryManagement.deallocateMemory(0));
-        assertTrue(memoryManagement.deallocateMemory(50));
+        assertTrue(memoryManagement.deallocateMemory(p1));
+        assertTrue(memoryManagement.deallocateMemory(p2));
 
         //Tests that the head how has the full 100, and that there is no next block
         assertEquals(100,memoryManagement.head.getSize());
@@ -108,11 +109,10 @@ public class MemoryManagementTests {
         kernel.admitProcess(p2);
 
         //Tests that the page table for p1 has the correct number of pages (7 pages for 70 memory size with page size of 10)
-        assertEquals(7, p1.pageTable.size());
+        assertEquals(7, p1.pageTable.length);
 
         //Tests that the frames allocated to p1 are marked as used in the frame table
-        ArrayList<Integer> pageTableP1 = pagingAllocation.getProcessPageTable(p1);
-        assertEquals(7,pageTableP1.size());
+        assertEquals(7, p1.pageTable.length);
         assertEquals(3, pagingAllocation.freeFrames());
 
         //Process 2 is added to wait queue since there are not enough free frames for it
@@ -125,9 +125,28 @@ public class MemoryManagementTests {
         assertEquals(0, kernel.memoryWaitQueue.size());
 
         //tests that the frames allocated to p2 are marked as used in the frame table
-        ArrayList<Integer> pageTableP2 = pagingAllocation.getProcessPageTable(p2);
-        assertEquals(4,pageTableP2.size());
+        assertEquals(4, p2.pageTable.length);
         assertEquals(6, pagingAllocation.freeFrames());
+    }
+
+    @Test
+    void testPagingDeallocation(){
+        PagingAllocation memoryManagment = new PagingAllocation(10, 40);
+
+        Process p1 = new Process(1, 0 , new ArrayList<>(), 20);
+        Process p2 = new Process(2, 0 , new ArrayList<>(), 30);
+
+        // p1 needs 2 pages, so it should allocate successfully
+        assertTrue(memoryManagment.allocateMemory(p1));
+
+        // p2 needs 3 pages, but only 2 frames are left
+        assertFalse(memoryManagment.allocateMemory(p2));
+
+        // Free p1's 2 frames
+        assertTrue(memoryManagment.deallocateMemory(p1));
+
+        // Now all 4 frames are free again, so p2 should fit
+        assertTrue(memoryManagment.allocateMemory(p2));
     }
 
 
