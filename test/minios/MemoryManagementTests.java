@@ -1,5 +1,6 @@
 package minios;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -108,11 +109,10 @@ public class MemoryManagementTests {
         kernel.admitProcess(p2);
 
         //Tests that the page table for p1 has the correct number of pages (7 pages for 70 memory size with page size of 10)
-        assertEquals(7, p1.pageTable.size());
+        assertEquals(7, p1.pageTable.length);
 
         //Tests that the frames allocated to p1 are marked as used in the frame table
-        ArrayList<Integer> pageTableP1 = pagingAllocation.getProcessPageTable(p1);
-        assertEquals(7,pageTableP1.size());
+        assertEquals(7, p1.pageTable.length);
         assertEquals(3, pagingAllocation.freeFrames());
 
         //Process 2 is added to wait queue since there are not enough free frames for it
@@ -125,8 +125,7 @@ public class MemoryManagementTests {
         assertEquals(0, kernel.memoryWaitQueue.size());
 
         //tests that the frames allocated to p2 are marked as used in the frame table
-        ArrayList<Integer> pageTableP2 = pagingAllocation.getProcessPageTable(p2);
-        assertEquals(4,pageTableP2.size());
+        assertEquals(4, p2.pageTable.length);
         assertEquals(6, pagingAllocation.freeFrames());
     }
 

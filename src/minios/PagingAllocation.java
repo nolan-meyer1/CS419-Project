@@ -62,7 +62,7 @@ public class PagingAllocation implements MemoryManagement {
     }
 
     //Calculate free frames
-    private int freeFrames(){
+    protected int freeFrames(){
         int freeFrames = 0;
         for(boolean frame : frameTable){
             if(frame){
