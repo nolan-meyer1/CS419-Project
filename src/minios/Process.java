@@ -14,7 +14,7 @@ public class Process {
     public int waitTime = 0;
     public int memorySize = 0;
     public int address = -1;
-    public int[] pageTable;
+    public ArrayList<Integer> pageTable;
 
     public Process(int pid, int arrivalTime, List<Instruction> code, int memorySize) {
         this.pid = pid;
