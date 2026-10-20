@@ -23,8 +23,8 @@ public class Simulator {
             while (it.hasNext()) {
                 Process p = it.next();
                 if (p.arrivalTime == clock) {
-                    System.out.println("[Tick " + clock + "] Process " + p.pid + " arrives.");
-                    kernel.admitProcess(p);
+                    System.out.println("[Tick " + clock + "] Process " + p.pid + " arrives. Memory size: " + p.memorySize);
+                    kernel.admitProcess(p, clock);
                     it.remove();
                 }
             }
@@ -42,12 +42,17 @@ public class Simulator {
             List<Process> workload = TraceParser.parseWorkload("workload.txt");
 
             SchedulingAlgo algo = new SJF();
-            Kernel kernel = new Kernel(algo,new ContiguousAllocation(100));
+            // Contiguous Memory Allocation
+            Kernel kernel = new Kernel(algo, new ContiguousAllocation(120));
+
+            // Paging Memory Allocation
+            // Kernel kernel = new Kernel(algo, new PagingAllocation(10, 120));
             Simulator sim = new Simulator(kernel, workload);
 
             sim.run();
 
-            System.out.printf("Average Wait Time: %.2f",kernel.calculateAverageWaitTime());
+            System.out.printf("Average Wait Time: %.2f\n",kernel.calculateAverageWaitTime());
+            System.out.printf("Average Memory Queue Wait Time: %.2f%n",kernel.calculateAverageMemoryWaitTime());
     }
 
 }
