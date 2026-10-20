@@ -2,6 +2,8 @@ package minios;
 
 public class ContiguousAllocation implements MemoryManagement {
     protected MemoryBlock head;
+    private String coalescingBefore = null;
+    private String coalescingAfter = null;
 
     public ContiguousAllocation(int totalMemory) {
         this.head = new MemoryBlock(0, totalMemory, true);
@@ -54,8 +56,23 @@ public class ContiguousAllocation implements MemoryManagement {
                 // Mark memory as free
                 current.setFree(true);
 
+                // Free blocks before coalescing
+                String beforeCoalescing = getFreeBlocks();
+
+
                 // Merge all adjacent free blocks
                 mergeFreeBlocks();
+
+                // Free blocks after coalescing
+                String afterCoalescing = getFreeBlocks();
+
+                if (!beforeCoalescing.equals(afterCoalescing)) {
+                    System.out.println("Before coalescing: " + beforeCoalescing);
+                    System.out.println("After coalescing: " + afterCoalescing);
+                } else {
+                    coalescingBefore = null;
+                    coalescingAfter = null;
+                }
 
                 process.address = -1;
 
@@ -84,5 +101,38 @@ public class ContiguousAllocation implements MemoryManagement {
                 current = current.getNext();
             }
         }
+    }
+
+    public String getFreeBlocks() {
+
+        StringBuilder result = new StringBuilder();
+        MemoryBlock current = head;
+
+        while (current != null) {
+
+            if (current.isFree()) {
+
+                result.append("[Start: ")
+                        .append(current.getStartAddress())
+                        .append(", Size: ")
+                        .append(current.getSize())
+                        .append("] ");
+            }
+
+            current = current.getNext();
+        }
+
+        if (result.length() == 0) {
+            return "No free blocks";
+        }
+
+        return result.toString();
+    }
+    public String getCoalescingBefore() {
+        return coalescingBefore;
+    }
+
+    public String getCoalescingAfter() {
+        return coalescingAfter;
     }
 }

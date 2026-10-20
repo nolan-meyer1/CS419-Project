@@ -27,14 +27,64 @@ public class Kernel {
     }
 
     public void admitProcess(Process p) {
+        admitProcess(p, 0);
+    }
+    public void admitProcess(Process p, int currentTime) {
 
-        if(memoryManagement.allocate(p)) {
+        // tracks every process that arrives
+        allProcesses.add(p);
+
+        if (memoryManagement.allocate(p)) {
 
             p.state = Process.State.READY;
             algo.addProcess(readyQueue, p);
-            allProcesses.add(p);
-        }else{
+
+            System.out.println("[Tick " + currentTime
+                    + "] Process " + p.pid
+                    + " admitted into memory.");
+
+            if (memoryManagement instanceof ContiguousAllocation) {
+
+                System.out.println("[Tick " + currentTime
+                        + "] Process " + p.pid
+                        + " allocated at address " + p.address
+                        + " with size " + p.memorySize);
+            }else if (memoryManagement instanceof PagingAllocation) {
+
+                System.out.println("[Tick " + currentTime
+                        + "] Process " + p.pid
+                        + " page table: "
+                        + Arrays.toString(p.pageTable));
+            }else if (memoryManagement instanceof PagingAllocation) {
+
+                PagingAllocation paging =
+                        (PagingAllocation) memoryManagement;
+
+                System.out.println("[Tick " + currentTime
+                        + "] Process " + p.pid
+                        + " cannot be admitted. Free frames: "
+                        + paging.freeFrames());
+            }
+
+        } else {
+
+            // Process remains in a NEW state while waiting for memory
+            p.state = Process.State.NEW;
             memoryWaitQueue.add(p);
+
+            System.out.println("[Tick " + currentTime
+                    + "] Process " + p.pid
+                    + " placed in memory waiting queue.");
+
+            if (memoryManagement instanceof ContiguousAllocation) {
+
+                ContiguousAllocation contiguous =
+                        (ContiguousAllocation) memoryManagement;
+
+                System.out.println("[Tick " + currentTime
+                        + "] Available free blocks: "
+                        + contiguous.getFreeBlocks());
+            }
         }
     }
 
@@ -60,7 +110,7 @@ public class Kernel {
             // Current process has finished.
             if (inst == null) {
                 System.out.println("[Tick " + currentTime + "] Process " + runningProcess.pid + " Terminates.");
-                terminateProcess(runningProcess);
+                terminateProcess(runningProcess, currentTime);
                 // In this case, no instruction is executed, so no CPU cycle
                 // is used. Can't advance the simulation clock. Loop
                 // back and grab the next process to execute.
@@ -117,9 +167,10 @@ public class Kernel {
             }
         }
 
-        //Updates wait time for processes in queue
-        for (Process p : waitQueue) {
-            p.waitTime++;
+        // Updates memory waiting time for processes
+        // that are waiting for memory allocation
+        for (Process p : memoryWaitQueue) {
+            p.memoryWaitTime++;
         }
     }
 
@@ -144,14 +195,37 @@ public class Kernel {
         }
     }
 
-    private void terminateProcess(Process p) {
+    private void terminateProcess(Process p, int currentTime) {
         p.state = Process.State.TERMINATED;
         runningProcess = null;
-        memoryManagement.release(p);
-        scanMemoryWaitQueue();
+
+        boolean released = memoryManagement.release(p);
+
+        if (released) {
+            System.out.println("[Tick " + currentTime
+                    + "] Process " + p.pid
+                    + " memory released.");
+        } if (released && memoryManagement instanceof ContiguousAllocation) {
+
+            ContiguousAllocation contiguous =
+                    (ContiguousAllocation) memoryManagement;
+
+            if (contiguous.getCoalescingBefore() != null) {
+
+                System.out.println("[Tick " + currentTime
+                        + "] Before coalescing: "
+                        + contiguous.getCoalescingBefore());
+
+                System.out.println("[Tick " + currentTime
+                        + "] After coalescing: "
+                        + contiguous.getCoalescingAfter());
+            }
+        }
+
+        scanMemoryWaitQueue(currentTime);
 
     }
-    private void scanMemoryWaitQueue(){
+    private void scanMemoryWaitQueue(int currentTime){
         Iterator<Process> iterator = memoryWaitQueue.iterator();
 
         while (iterator.hasNext()) {
@@ -161,7 +235,25 @@ public class Kernel {
                 iterator.remove();
                 waitingProcess.state= Process.State.READY;
                 algo.addProcess(readyQueue, waitingProcess);
-                allProcesses.add(waitingProcess);
+                System.out.println("[Tick " + currentTime
+                        + "] Process " + waitingProcess.pid
+                        + " admitted from memory waiting queue."
+                        + " Memory size: " + waitingProcess.memorySize);
+
+                if (memoryManagement instanceof ContiguousAllocation) {
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + waitingProcess.pid
+                            + " allocated at address " + waitingProcess.address
+                            + " with size " + waitingProcess.memorySize);
+
+                } else if (memoryManagement instanceof PagingAllocation) {
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + waitingProcess.pid
+                            + " page table: "
+                            + Arrays.toString(waitingProcess.pageTable));
+                }
             }
         }
     }
@@ -209,5 +301,18 @@ public class Kernel {
         }
 
         return processCount > 0 ? (double) totalWaitTime / processCount : 0.0;
+    }
+
+    public double calculateAverageMemoryWaitTime() {
+
+        int totalMemoryWaitTime = 0;
+        int processCount = allProcesses.size();
+
+        for (Process p : allProcesses) {
+            totalMemoryWaitTime += p.memoryWaitTime;
+        }
+
+        return processCount > 0
+                ? (double) totalMemoryWaitTime / processCount : 0.0;
     }
 }

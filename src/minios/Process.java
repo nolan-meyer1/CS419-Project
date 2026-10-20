@@ -12,6 +12,7 @@ public class Process {
     public final List<Instruction> code;
     public int programCounter = 0;
     public int waitTime = 0;
+    public int memoryWaitTime = 0;
     public int memorySize = 0;
     public int address = -1;
     public int[] pageTable;
