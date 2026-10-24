@@ -34,9 +34,10 @@ public class SJF implements SchedulingAlgo {
         int burstLength = 0;
 
         for (Instruction inst : p.code){
-            if(inst.type == Instruction.OpType.CPU) {
-                burstLength += inst.duration;
+            if(inst.type == Instruction.OpType.IO) {
+                break;
             }
+            burstLength += inst.duration;
         }
         return burstLength;
     }

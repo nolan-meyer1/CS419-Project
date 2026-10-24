@@ -41,7 +41,7 @@ public class Simulator {
     public static void main(String[] args) throws Exception{
             List<Process> workload = TraceParser.parseWorkload("workload.txt");
 
-            SchedulingAlgo algo = new SJF();
+            SchedulingAlgo algo = new FCFS();
             // Contiguous Memory Allocation
             Kernel kernel = new Kernel(algo, new ContiguousAllocation(120));
 
