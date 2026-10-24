@@ -144,4 +144,23 @@ public class MemoryManagementTests {
         assertEquals(4, p2.pageTable.length);
     }
 
+    @Test
+    void pagingAllocationTranslateAddress(){
+        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+        Process p1 = new Process(1, 0, new ArrayList<>(), 70);
+
+        //Allocate memory for p1
+        assertTrue(pagingAllocation.allocate(p1));
+
+        //Translate a virtual address to a physical address
+        int virtualAddress = 25; // This is in page 2 (0-indexed), offset 5
+        int physicalAddress = pagingAllocation.translateAddress(p1, virtualAddress);
+
+        // The expected physical address should be the frame number * page size + offset
+        int expectedFrameNumber = p1.pageTable[2]; // Page 2's frame number
+        int expectedPhysicalAddress = expectedFrameNumber * pagingAllocation.getPageSize() + 5;
+
+        assertEquals(expectedPhysicalAddress, physicalAddress);
+    }
+
 }

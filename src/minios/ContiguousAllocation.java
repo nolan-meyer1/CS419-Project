@@ -85,6 +85,11 @@ public class ContiguousAllocation implements MemoryManagement {
         return false;
     }
 
+    @Override
+    public int translateAddress(Process process, int virtualAddress) {
+        return 0;
+    }
+
     private void mergeFreeBlocks() {
         MemoryBlock current = head;
 

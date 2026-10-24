@@ -70,6 +70,24 @@ public class PagingAllocation implements MemoryManagement {
         }
     }
 
+    @Override
+    public int translateAddress(Process process, int virtualAddress) {
+
+        if (process.pageTable == null) {
+            throw new IllegalArgumentException("Process has no allocated memory.");
+        }
+
+        int pageNumber = virtualAddress / pageSize;
+        int offset = virtualAddress % pageSize;
+
+        if (pageNumber >= process.pageTable.length) {
+            throw new IllegalArgumentException("Virtual address exceeds allocated memory.");
+        }
+
+        int frameNumber = process.pageTable[pageNumber];
+        return frameNumber * pageSize + offset;
+    }
+
     //Calculate free frames
     protected int freeFrames(){
         int freeFrames = 0;
