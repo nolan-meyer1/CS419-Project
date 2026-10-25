@@ -1,10 +1,5 @@
 package minios;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class PagingAllocation implements MemoryManagement {
 
     private final int pageSize;
@@ -75,6 +70,12 @@ public class PagingAllocation implements MemoryManagement {
 
         if (process.pageTable == null) {
             throw new IllegalArgumentException("Process has no allocated memory.");
+        }
+
+        if (virtualAddress < 0 || virtualAddress >= process.memorySize) {
+            throw new IllegalArgumentException(
+                    "Invalid virtual address: " + virtualAddress
+            );
         }
 
         int pageNumber = virtualAddress / pageSize;
