@@ -70,7 +70,7 @@ public class MemoryManagementTests {
 
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
-        Kernel kernel = new Kernel(new SJF(),new ContiguousAllocation(100));
+        Kernel kernel = new Kernel(new SJF(),new ContiguousAllocation(100),100);
 
         //Second process should be put in the memory wait queue since there is not enough memory for it
         kernel.admitProcess(p1);
@@ -121,7 +121,7 @@ public class MemoryManagementTests {
         Process p1 = new Process(1, 0, new ArrayList<>(), 70);
         Process p2 = new Process(2, 0, new ArrayList<>(), 40);
         PagingAllocation pagingAllocation = new PagingAllocation(10,100);
-        Kernel kernel = new Kernel(new SJF(),pagingAllocation);
+        Kernel kernel = new Kernel(new SJF(),pagingAllocation,100);
 
         //Second process should be put in the memory wait queue since there is not enough memory for it
         kernel.admitProcess(p1);
@@ -142,6 +142,25 @@ public class MemoryManagementTests {
 
         //tests that the frames allocated to p2 are marked as used in the frame table
         assertEquals(4, p2.pageTable.length);
+    }
+
+    @Test
+    void pagingAllocationTranslateAddress(){
+        PagingAllocation pagingAllocation = new PagingAllocation(10, 100);
+        Process p1 = new Process(1, 0, new ArrayList<>(), 70);
+
+        //Allocate memory for p1
+        assertTrue(pagingAllocation.allocate(p1));
+
+        //Translate a virtual address to a physical address
+        int virtualAddress = 25; // This is in page 2 (0-indexed), offset 5
+        int physicalAddress = pagingAllocation.translateAddress(p1, virtualAddress);
+
+        // The expected physical address should be the frame number * page size + offset
+        int expectedFrameNumber = p1.pageTable[2]; // Page 2's frame number
+        int expectedPhysicalAddress = expectedFrameNumber * pagingAllocation.getPageSize() + 5;
+
+        assertEquals(expectedPhysicalAddress, physicalAddress);
     }
 
 }

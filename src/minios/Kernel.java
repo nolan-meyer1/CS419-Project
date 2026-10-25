@@ -12,8 +12,9 @@ public class Kernel {
     private Process runningProcess = null;
     protected int timeQuantum; // Time quantum for RR
     private int quantumRemaining; // Remaining time for the current process
+    private int[] physicalMemory; // Represents the physical memory
 
-    public Kernel(SchedulingAlgo algo, MemoryManagement memoryManagement) {
+    public Kernel(SchedulingAlgo algo, MemoryManagement memoryManagement, int totalMemory) {
         this.algo = algo;
         this.memoryManagement = memoryManagement;
 
@@ -24,6 +25,8 @@ public class Kernel {
             this.timeQuantum = Integer.MAX_VALUE; // Effectively no quantum for non-RR algorithms
             this.quantumRemaining = timeQuantum;
         }
+
+        physicalMemory = new int[totalMemory]; // Initialize physical memory
     }
 
     public void admitProcess(Process p) {
