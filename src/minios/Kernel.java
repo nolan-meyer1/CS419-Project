@@ -58,15 +58,6 @@ public class Kernel {
                         + "] Process " + p.pid
                         + " page table: "
                         + Arrays.toString(p.pageTable));
-            }else if (memoryManagement instanceof PagingAllocation) {
-
-                PagingAllocation paging =
-                        (PagingAllocation) memoryManagement;
-
-                System.out.println("[Tick " + currentTime
-                        + "] Process " + p.pid
-                        + " cannot be admitted. Free frames: "
-                        + paging.freeFrames());
             }
 
         } else {
@@ -87,6 +78,15 @@ public class Kernel {
                 System.out.println("[Tick " + currentTime
                         + "] Available free blocks: "
                         + contiguous.getFreeBlocks());
+            }else if (memoryManagement instanceof PagingAllocation) {
+
+                PagingAllocation paging =
+                        (PagingAllocation) memoryManagement;
+
+                System.out.println("[Tick " + currentTime
+                        + "] Process " + p.pid
+                        + " cannot be admitted. Free frames: "
+                        + paging.freeFrames());
             }
         }
     }
