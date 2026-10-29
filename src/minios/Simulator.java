@@ -46,7 +46,7 @@ public class Simulator {
             Kernel kernel = new Kernel(algo, new ContiguousAllocation(120),120);
 
             // Paging Memory Allocation
-            // Kernel kernel = new Kernel(algo, new PagingAllocation(10, 120));
+            //Kernel kernel = new Kernel(algo, new PagingAllocation(10, 120), 120);
             Simulator sim = new Simulator(kernel, workload);
 
             sim.run();

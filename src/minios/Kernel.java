@@ -1,5 +1,6 @@
 package minios;
 
+import java.sql.SQLOutput;
 import java.util.*;
 
 public class Kernel {
@@ -130,6 +131,96 @@ public class Kernel {
                 // Can't advance the simulation clock. Loop back
                 // and grab the next process to execute.
                 continue;
+            }
+
+            // LOAD or STORE instruction
+            else if (inst.type == Instruction.OpType.LOAD || inst.type == Instruction.OpType.STORE) {
+
+                // Processes waiting in the ready queue waited for this CPU tick
+                for (Process p : readyQueue) {
+                    p.waitTime++;
+                }
+
+                try {
+                    // Translate virtual address to physical address
+                    int physicalAddress =
+                            memoryManagement.translateAddress(
+                                    runningProcess,
+                                    inst.address
+                                    );
+                    System.out.println("[Tick " + currentTime
+                    + "] Process " + runningProcess.pid
+                    + " translated virtual address "
+                    + inst.address
+                    + " to physical address "
+                    + physicalAddress);
+
+                    if (inst.type == Instruction.OpType.STORE) {
+
+                        physicalMemory[physicalAddress] = inst.value;
+
+                        System.out.println("[Tick " + currentTime
+                                + "] Process " + runningProcess.pid
+                                + " stores value "
+                                + inst.value
+                                + " at physical address "
+                                + physicalAddress);
+
+                    } else {
+                        int value = physicalMemory[physicalAddress];
+
+                        System.out.println("[Tick " + currentTime
+                                + "] Process " + runningProcess.pid
+                                + " loads value "
+                                + value
+                                + " from physical address "
+                                + physicalAddress);
+                    }
+
+                    // LOAD and STORE always take one tick
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+
+                    // Instruction finished
+                    runningProcess.programCounter++;
+
+                    if (algo instanceof RR && quantumRemaining == 0) {
+                        preemptProcess(runningProcess);
+                    }
+                } catch (IllegalArgumentException e) {
+
+                    // Invalid LOAD or STORE still consumes one tick
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+
+                    String instructionDetails;
+
+                    if (inst.type == Instruction.OpType.STORE) {
+                        instructionDetails =
+                                "STORE " + inst.address + " " + inst.value;
+                    } else {
+                        instructionDetails =
+                                "LOAD " + inst.address;
+                    }
+                    System.out.println("[Tick " + currentTime
+                            + "] WARNING: Process "
+                            + runningProcess.pid
+                            + " attempted invalid instruction "
+                            + instructionDetails);
+
+                    // Invalid memory access immediately terminates the process
+                    terminateProcess(runningProcess, currentTime);
+                }
             }
 
             // CPU instruction: the instruction has not finished;
