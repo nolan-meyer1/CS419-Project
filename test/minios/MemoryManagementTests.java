@@ -3,6 +3,9 @@ package minios;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -163,4 +166,120 @@ public class MemoryManagementTests {
         assertEquals(expectedPhysicalAddress, physicalAddress);
     }
 
+    @Test
+    void testStoreAndLoadPaging() {
+
+        // Create a small instruction list that stores a value
+        // and then loads from the same virtual address
+        List<Instruction> instructions = new ArrayList<>();
+
+        instructions.add(new Instruction(Instruction.OpType.STORE, 7, 123));
+
+        instructions.add(new Instruction(Instruction.OpType.LOAD, 7, 0));
+
+        // Create a process with enough memory for virtual address 7
+        Process p = new Process(1, 0, instructions, 20);
+
+        // Use paging so address translation is already implemented
+        Kernel kernel = new Kernel(new FCFS(), new PagingAllocation(10, 100), 100);
+
+        // Capture console output so we can verify STORE and LOAD behavior
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new PrintStream(output));
+
+            // Admit the process and execute both instructions
+            kernel.admitProcess(p, 0);
+            kernel.onClockTick(0);
+            kernel.onClockTick(1);
+
+        } finally {
+            // Restore normal console output after the test
+            System.setOut(originalOut);
+        }
+
+        String console = output.toString();
+
+        // Verify the value was stored and later loaded correctly
+        assertTrue(console.contains("stores value 123"));
+        assertTrue(console.contains("loads value 123"));
+    }
+
+    @Test
+    void testInvalidStoreTerminatesProcessPaging() {
+
+        // Virtual address 10 is invalid for a process with memory size 10
+        // because valid addresses are 0 through 9
+        List<Instruction> instructions = new ArrayList<>();
+
+        instructions.add(new Instruction(Instruction.OpType.STORE, 10, 999));
+
+        Process p = new Process(1, 0, instructions, 10);
+
+        // Use paging to test invalid address handling
+        Kernel kernel = new Kernel(new FCFS(), new PagingAllocation(10, 100), 100);
+
+        // Capture console output to verify that a warning is printed
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new PrintStream(output));
+
+            // Admit the process and execute the invalid STORE
+            kernel.admitProcess(p, 0);
+            kernel.onClockTick(0);
+
+        } finally {
+            System.setOut(originalOut);
+        }
+
+        String console = output.toString();
+
+        // Verify that the invalid STORE produced the expected warning
+        assertTrue(
+                console.contains("WARNING: Process 1 attempted invalid instruction STORE 10 999"));
+
+        // An invalid memory access should immediately terminate the process
+        assertEquals(Process.State.TERMINATED, p.state);
+    }
+
+    @Test
+    void testInvalidLoadTerminatesProcessPaging() {
+
+        // Virtual address 15 is invalid for a process with memory size 10
+        List<Instruction> instructions = new ArrayList<>();
+
+        instructions.add(new Instruction(Instruction.OpType.LOAD, 15, 0));
+
+        Process p = new Process(1, 0, instructions, 10);
+
+        // Use paging to test invalid address handling
+        Kernel kernel = new Kernel(new FCFS(), new PagingAllocation(10, 100), 100);
+
+        // Capture console output to verify that a warning is printed
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new PrintStream(output));
+
+            // Admit the process and execute the invalid LOAD
+            kernel.admitProcess(p, 0);
+            kernel.onClockTick(0);
+
+        } finally {
+            System.setOut(originalOut);
+        }
+
+        String console = output.toString();
+
+        // Verify that the invalid LOAD produced the expected warning
+        assertTrue(console.contains("WARNING: Process 1 attempted invalid instruction LOAD 15"));
+
+        // An invalid memory access should immediately terminate the process
+        assertEquals(Process.State.TERMINATED, p.state);
+    }
 }

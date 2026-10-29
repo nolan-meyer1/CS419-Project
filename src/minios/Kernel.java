@@ -132,6 +132,130 @@ public class Kernel {
                 continue;
             }
 
+            // LOAD or STORE instruction
+            else if (inst.type == Instruction.OpType.STORE) {
+
+                for (Process p : readyQueue) {
+                    p.waitTime++;
+                }
+
+                try {
+                    int physicalAddress =
+                            memoryManagement.translateAddress(
+                                    runningProcess,
+                                    inst.address
+                            );
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + runningProcess.pid
+                            + " translated virtual address "
+                            + inst.address
+                            + " to physical address "
+                            + physicalAddress);
+
+                    physicalMemory[physicalAddress] = inst.value;
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + runningProcess.pid
+                            + " stores value "
+                            + inst.value
+                            + " at physical address "
+                            + physicalAddress);
+
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+                    runningProcess.programCounter++;
+
+                    if (algo instanceof RR && quantumRemaining == 0) {
+                        preemptProcess(runningProcess);
+                    }
+
+                } catch (IllegalArgumentException e) {
+
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+
+                    System.out.println("[Tick " + currentTime
+                            + "] WARNING: Process "
+                            + runningProcess.pid
+                            + " attempted invalid instruction STORE "
+                            + inst.address + " " + inst.value);
+
+                    terminateProcess(runningProcess, currentTime);
+                }
+            }
+
+            else if (inst.type == Instruction.OpType.LOAD) {
+
+                for (Process p : readyQueue) {
+                    p.waitTime++;
+                }
+
+                try {
+                    int physicalAddress =
+                            memoryManagement.translateAddress(
+                                    runningProcess,
+                                    inst.address
+                            );
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + runningProcess.pid
+                            + " translated virtual address "
+                            + inst.address
+                            + " to physical address "
+                            + physicalAddress);
+
+                    int value = physicalMemory[physicalAddress];
+
+                    System.out.println("[Tick " + currentTime
+                            + "] Process " + runningProcess.pid
+                            + " loads value "
+                            + value
+                            + " from physical address "
+                            + physicalAddress);
+
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+                    runningProcess.programCounter++;
+
+                    if (algo instanceof RR && quantumRemaining == 0) {
+                        preemptProcess(runningProcess);
+                    }
+
+                } catch (IllegalArgumentException e) {
+
+                    inst.remainingTicks--;
+
+                    if (algo instanceof RR) {
+                        quantumRemaining--;
+                    }
+
+                    cpuCycleUsed = true;
+
+                    System.out.println("[Tick " + currentTime
+                            + "] WARNING: Process "
+                            + runningProcess.pid
+                            + " attempted invalid instruction LOAD "
+                            + inst.address);
+
+                    terminateProcess(runningProcess, currentTime);
+                }
+            }
             // CPU instruction: the instruction has not finished;
             // Utilize one CPU cycle
             else if(inst.remainingTicks > 0){
