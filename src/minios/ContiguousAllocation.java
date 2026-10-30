@@ -67,9 +67,12 @@ public class ContiguousAllocation implements MemoryManagement {
                 String afterCoalescing = getFreeBlocks();
 
                 if (!beforeCoalescing.equals(afterCoalescing)) {
-                    System.out.println("Before coalescing: " + beforeCoalescing);
-                    System.out.println("After coalescing: " + afterCoalescing);
+
+                    coalescingBefore = beforeCoalescing;
+                    coalescingAfter = afterCoalescing;
+
                 } else {
+
                     coalescingBefore = null;
                     coalescingAfter = null;
                 }
@@ -87,7 +90,24 @@ public class ContiguousAllocation implements MemoryManagement {
 
     @Override
     public int translateAddress(Process process, int virtualAddress) {
-        return 0;
+        // Check if the process has allocated memory
+        if (process.address < 0) {
+            throw new IllegalArgumentException(
+                    "Process " + process.pid + " has no allocated memory."
+            );
+        }
+
+        // Check if the virtual address is valid
+        if (virtualAddress < 0 || virtualAddress >= process.memorySize) {
+            throw new IllegalArgumentException(
+                    "Invalid virtual address: " + virtualAddress
+            );
+        }
+
+        // Translates virtual address to physical address
+        int physicalAddress = process.address + virtualAddress;
+
+        return physicalAddress;
     }
 
     private void mergeFreeBlocks() {
