@@ -135,9 +135,7 @@ public class Kernel {
             // LOAD or STORE instruction
             else if (inst.type == Instruction.OpType.STORE) {
 
-                for (Process p : readyQueue) {
-                    p.waitTime++;
-                }
+                incrementWaitTimes();
 
                 try {
                     int physicalAddress =
@@ -197,9 +195,7 @@ public class Kernel {
 
             else if (inst.type == Instruction.OpType.LOAD) {
 
-                for (Process p : readyQueue) {
-                    p.waitTime++;
-                }
+                incrementWaitTimes();
 
                 try {
                     int physicalAddress =
@@ -298,6 +294,12 @@ public class Kernel {
         // that are waiting for memory allocation
         for (Process p : memoryWaitQueue) {
             p.memoryWaitTime++;
+        }
+    }
+
+    private void incrementWaitTimes() {
+        for (Process p : readyQueue) {
+            p.waitTime++;
         }
     }
 
