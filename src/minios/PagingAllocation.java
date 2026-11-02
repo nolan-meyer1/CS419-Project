@@ -66,7 +66,7 @@ public class PagingAllocation implements MemoryManagement {
     }
 
     @Override
-    public int translateAddress(Process process, int virtualAddress) {
+    public int translate(Process process, int virtualAddress) {
 
         if (process.pageTable == null) {
             throw new IllegalArgumentException("Process has no allocated memory.");

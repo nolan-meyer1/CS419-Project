@@ -89,7 +89,7 @@ public class ContiguousAllocation implements MemoryManagement {
     }
 
     @Override
-    public int translateAddress(Process process, int virtualAddress) {
+    public int translate(Process process, int virtualAddress) {
         // Check if the process has allocated memory
         if (process.address < 0) {
             throw new IllegalArgumentException(

@@ -157,7 +157,7 @@ public class MemoryManagementTests {
 
         //Translate a virtual address to a physical address
         int virtualAddress = 25; // This is in page 2 (0-indexed), offset 5
-        int physicalAddress = pagingAllocation.translateAddress(p1, virtualAddress);
+        int physicalAddress = pagingAllocation.translate(p1, virtualAddress);
 
         // The expected physical address should be the frame number * page size + offset
         int expectedFrameNumber = p1.pageTable[2]; // Page 2's frame number

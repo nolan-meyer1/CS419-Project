@@ -139,7 +139,7 @@ public class Kernel {
 
                 try {
                     int physicalAddress =
-                            memoryManagement.translateAddress(
+                            memoryManagement.translate(
                                     runningProcess,
                                     inst.address
                             );
@@ -199,7 +199,7 @@ public class Kernel {
 
                 try {
                     int physicalAddress =
-                            memoryManagement.translateAddress(
+                            memoryManagement.translate(
                                     runningProcess,
                                     inst.address
                             );
