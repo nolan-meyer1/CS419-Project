@@ -39,11 +39,11 @@ public class Simulator {
     }
 
     public static void main(String[] args) throws Exception{
+            final int TOTAL_MEMORY = 120;
             List<Process> workload = TraceParser.parseWorkload("workload.txt");
-
             SchedulingAlgo algo = new FCFS();
             // Contiguous Memory Allocation
-            Kernel kernel = new Kernel(algo, new ContiguousAllocation(120),120);
+            Kernel kernel = new Kernel(algo, new ContiguousAllocation(TOTAL_MEMORY),TOTAL_MEMORY);
 
             // Paging Memory Allocation
             //Kernel kernel = new Kernel(algo, new PagingAllocation(10, 120), 120);

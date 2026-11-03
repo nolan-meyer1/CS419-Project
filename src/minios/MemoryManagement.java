@@ -6,5 +6,5 @@ public interface MemoryManagement {
 
     boolean release(Process process);
 
-    int translateAddress(Process process, int virtualAddress);
+    int translate(Process process, int virtualAddress);
 }
